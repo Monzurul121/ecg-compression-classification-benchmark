@@ -4,7 +4,7 @@ This repository presents an ongoing research project investigating how different
 
 ## Project Overview
 
-ECG signal compression often offers a means to mitigate storage problems, transmission cost, privacy issues, and may also support more efficient machine learning model deployment for ECG signals. More recently, ECG compression has received renewed attention in parallel with the proliferation of wearable monitoring and AI-based ECG analysis, as it is increasingly used as part of end-to-end ECG signal analysis pipelines.
+ECG signal compression often offers a means to mitigate storage problems, transmission cost, privacy issues, and may also support more efficient ML based ECG classification model on edge devices. 
 
 In the conventional workflow, the ECG waveform is compressed and later reconstructed before downstream analysis. However, ECG compression schemes may compromise clinically significant morphology and may also introduce computational burden. When the compressed-reconstructed ECG signal is used in downstream ML classifiers, the classification performance may degrade. This issue is particularly important in clinical applications, where even minor signal distortions could potentially mask subtle but diagnostically significant features.
 
@@ -70,6 +70,7 @@ Compression performance is evaluated using:
 ### Classification metrics
 Classification performance is evaluated using:
 - **Macro-F1**
+- **End to End Accuracy**
 - **Macro-AUC**
 - **Macro-AUPRC (One-vs-Rest)**
 - **F1-score for Supraventricular (S) beats**
