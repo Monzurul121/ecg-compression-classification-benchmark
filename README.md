@@ -102,18 +102,21 @@ End-to-end Macro-F1 plotted against the achieved DS2 compression ratio (log scal
 
 These differences indicate that **PRD does not fully characterise the downstream impact of compression** — codec family matters at fixed distortion.
 
-### Figure 4 — End-to-end accuracy across all compression conditions
+### Figure 4 — Conditional vs end-to-end Macro-F1 in Scenario III
 
-![End-to-end accuracy bar chart](docs/docs/fig4_e2e_accuracy.png)
+![Conditional Macro-F1 vs E2E Macro-F1 across compression conditions](docs/docs/fig4_e2e_accuracy.png)
 
-End-to-end accuracy (per-detected-beat accuracy weighted by coverage) for every codec × distortion combination, in both scenarios and both classifiers. Two patterns are visible:
+This figure visualises the gap between two ways of measuring the same classifier on the same reconstructed signal, in **Scenario III** (retrain on reconstructed). The light bars show **conditional Macro-F1** — the score the classifier reports on the beats that the QRS detector successfully recovered from the reconstructed signal. The dark bars show **E2E Macro-F1**, which additionally penalises every gold-standard beat that the detector missed by counting it as a false negative for its true class. The dotted line marks the Scenario I (raw) baseline for each classifier; red annotations give the percentage-point drop from conditional to E2E.
 
-1. **End-to-end accuracy drops sharply** from the ~0.96 raw baseline once compression is introduced, regardless of codec or classifier.
-2. **The two classifier panels are nearly identical**, and Scenario II vs Scenario III bars within each panel are also nearly identical.
+Three observations:
 
-The reason both panels look the same is that end-to-end accuracy is dominated by **R-peak detection failures on reconstructed signals**, not by the classifier. When the QRS detector misses 24–40% of the beats on a reconstructed signal, those misses become errors in the end-to-end metric and they swamp any difference the classifier choice might make on the beats that *are* detected.
+1. **The conditional–E2E gap is small but always negative**, ranging from −0.5 to −1.4 percentage points across the 20 conditions shown. The QRS detector misses real beats but the classifier is still doing most of the work — missed-beat penalties do not collapse the metric, they erode it.
 
-This is the practical deployment picture and it complements — rather than contradicts — the per-detected-beat metrics in Figures 1–3. On per-detected-beat metrics the CNN clearly outperforms the RF under compression. On the end-to-end metric, both classifiers converge to the same coverage-bound ceiling.
+2. **The gap widens with distortion.** At mild operating points the gap is ≤0.7 pp; at aggressive operating points it grows to roughly 1.0–1.4 pp. The R-peak detector becomes more error-prone as the reconstructed waveform becomes less faithful, exactly when the classifier is also working hardest. This is the *compounding* effect that per-detected-beat metrics hide.
+
+3. **The CNN–CAE Mild combination is the only operating point that exceeds its own baseline on both metrics.** With deep-learning-based mild compression, the CNN's E2E Macro-F1 (84.0%) sits *above* the 82.1% raw baseline, even after accounting for missed beats. No other (codec, classifier) combination achieves this.
+
+The takeaway is operational: the systematic gap between Macro-F1 and E2E Macro-F1 is small enough that conventional reporting is not catastrophically wrong, but it is large enough at aggressive distortion to matter clinically — and any benchmark that ignores it will overstate the safe operating range of a compression-classification pipeline.
 
 ### Key Findings
 
@@ -140,7 +143,7 @@ This is the practical deployment picture and it complements — rather than cont
 **⚠️ Conventional metrics are misleading under compression**
 
 - Overall accuracy and Macro-F1 hide severe per-class drops on the rare supraventricular (S) class. In several cases the overall Macro-F1 looks intact while the per-class F1-S has collapsed.
-- The systematic gap between Macro-F1 and E2E Macro-F1 is visible across scenarios and conditions. Conventional per-detected-beat metrics substantially understate the clinical harm by ignoring beats missed during automatic detection.
+- The systematic gap between conditional Macro-F1 and E2E Macro-F1 (Figure 4) is small at mild distortion (≤0.7 pp) but grows to 1.0–1.4 pp at aggressive distortion. Conventional per-detected-beat metrics therefore understate the true cost of compression, and the understatement is largest exactly where the classifier is most stressed.
 - Any benchmark of compression–classification interaction should report per-class metrics and end-to-end metrics explicitly, not just aggregated per-detected-beat scores.
 
 ## Limitations
